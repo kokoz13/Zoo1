@@ -1,0 +1,282 @@
+#include <iostream>
+#include <ctime>
+#include<stdlib.h>
+#include<map>
+#include<array>
+using namespace std;
+enum COMMAND{
+    LEFT,
+    RIGHT,
+    BACK,
+    STRAIGHT,
+    FEED,
+    TAKEPHOTO,
+    PAT,
+    EXIT
+};
+
+
+
+enum ANIMAL_TYPE{
+    ZEBRA,
+    LION,
+    TIGER,
+    MONKEY,
+    HORSE,
+    CAMEL,
+    PYTHON,
+    BIZON,
+    UNKNOWN
+};
+// rand()% MAX_ANIMALS
+
+class Animal {
+    private: 
+    string name;
+    ANIMAL_TYPE type;
+    bool canFeed;
+    bool canTakePhoto;
+    bool canPat;
+
+    public:
+    friend class Action;
+    void printMenu() {
+        if(canFeed){
+            cout << "4: feed    ";
+        }
+        if(canTakePhoto){
+            cout << "5: take photo    ";
+        }
+        if(canPat){
+            cout << "6:pat    ";
+        }
+        cout << endl;
+    }
+    void feed() {
+        if (canFeed) {
+            cout<<"you feed "<< name <<endl;
+            feedback();
+        }
+    }
+
+    void takePhoto() {
+        if (canTakePhoto) {
+            cout<<"you take photo of "<< name <<endl;
+            feedback();
+        }
+    }
+
+    void pat() {
+        if (canPat) {
+            cout<<"you pat "<< name <<endl;
+           feedback();
+        }
+    }
+
+    void feedback () {
+        srand(time(nullptr));
+        int randomNumber = rand()%2;
+        if (1) {
+            cout<< name <<" likes you";
+        }
+        if (0) {
+            cout<< name <<" doesnt like it";
+        }
+    }
+
+    Animal(ANIMAL_TYPE type, string name, bool canFeed, bool canTakePhoto, bool canPat){
+        this->type = type; 
+        this->name = name;
+        this->canFeed = canFeed;
+        this->canTakePhoto = canTakePhoto;
+        this->canPat = canPat;
+
+    }
+};
+
+class Place {
+    private:
+    int posX = 1;
+    int posY = 1;
+
+    int minZooArrayMapSize = 0;
+    int maxZooArrayMapSize = 2; // 3 x 3
+
+    bool canMoveLeft;
+    bool canMoveRight;
+    bool canMoveStraight;
+    bool canMoveBack;
+    
+    public:
+    friend class Action;
+    
+    std::array getCurrentPlace() {
+        return [posX, posY];
+    }
+////////////////////////////////
+    void printMenu(){
+        if(canMoveLeft){
+            cout<<"0: left   ";
+        }
+        if(canMoveRight){
+            cout<<"1: right   ";
+        }
+        if(canMoveStraight){
+            cout<<"3: straight   ";
+        }
+        if(canMoveBack){
+            cout<<"2: back   ";
+        }
+    }
+    Place () {
+        posX = posX;
+        posY = posY;
+
+        canMoveLeft = posX != minZooArrayMapSize;
+        canMoveRight = posX != maxZooArrayMapSize;
+        canMoveStraight = posY != minZooArrayMapSize;
+        canMoveBack = posY != maxZooArrayMapSize;
+    }
+    void moveLeft() {
+        posX++;
+    }
+
+    void moveRight() {
+        posX--;
+    }
+
+    void moveStraight() {
+        posY++;
+    }
+
+    void moveBack() {
+        posY--;
+    }
+};
+
+class Zoo {
+    
+    std::map<std::array, Animal> animals { 
+        {[0, 0], Animal(MONKEY, "Monkey", true, false, true)}, 
+        {[0, 1], Animal(HORSE, "Horse", true, true, true)}, 
+        {[0, 2], Animal(CAMEL, "Camel", true, true, true)}, 
+        {[1, 0], Animal(BIZON, "Bizon", true, true, true)}, 
+        {[1, 1], Animal(UNKNOWN, "", false, false, false)}
+        {[1, 2], Animal(TIGER, "Tiger", false, true, false)}, 
+        {[2, 0], Animal(LION, "Lion", false, true, false)}, 
+        {[2, 1], Animal(ZEBRA, "Zebra", true, true, true)}, 
+        {[2, 2], Animal(PYTHON, "Python", false, true, true)}
+    };
+
+    // bind coord with type of animal
+
+    public:
+
+    void welcome() {
+        cout <<"Welcome to the Zoo"<<endl;
+    }
+
+    Animal getAnimalForCurrentPlace(Place place){
+        return animals[place.getCurrentPlace()];
+    }
+    
+};
+int readKey(){
+    int key;
+    cin >> key;
+    return key;
+}
+
+class Action {
+    Place *place;
+    Animal *animal;
+
+    public:
+    Action(Place *place, Animal *animal){
+       this->place = place;
+       this->animal = animal;
+    }
+    
+    void executeCommand(int command){
+        switch(command){
+            case LEFT: {
+                if(place->canMoveLeft){
+                    place->moveLeft();
+                    return;
+                }
+                break;  
+            }
+            case EXIT: {
+                exit(0);
+                break;  
+            }
+            case RIGHT: {
+                if(place->canMoveRight){
+                    place->moveRight();
+                    return;
+                }
+                break;  
+            }  
+            case STRAIGHT: {
+                if(place->canMoveStraight){
+                    place->moveStraight();
+                    return;
+                }
+                break;  
+            }  
+            case BACK: {
+                if(place->canMoveBack){
+                    place->moveBack();
+                    return;
+                }
+                break;  
+            }
+             case FEED: {
+                if(animal->canFeed){
+                    animal->feed();
+                    return;
+                }
+                break;  
+            }
+             case TAKEPHOTO: {
+                if(animal->canTakePhoto){
+                    animal->takePhoto();
+                    return;
+                }
+                break;  
+            }
+             case PAT: {
+                if(animal->canPat){
+                    animal->pat();
+                    return;
+                }
+                break;  
+            }  
+        }
+        cout << "No such option" << endl;
+    }
+
+};
+
+int main()
+{
+    Animal *animal;
+    Zoo zoo;
+    Place place;
+    Action action;
+   
+    zoo.welcome();
+    //bool run = true;
+
+    while(true)
+    {
+        cout << "chose your next action"<< endl;
+        place.printMenu();
+        zoo.getAnimalForCurrentPlace(place).printMenu();
+        action.executeCommand(readKey());
+        
+       
+    }
+
+}
+
